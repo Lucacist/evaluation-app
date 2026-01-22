@@ -30,7 +30,7 @@ export function CompetenceRadar({ data }: Props) {
             <PolarGrid />
             <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
             <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-            
+
             <Radar
               name="Moyenne"
               dataKey="score"
@@ -38,9 +38,8 @@ export function CompetenceRadar({ data }: Props) {
               fill="#2563eb"
               fillOpacity={0.6}
             />
-            <Tooltip 
-              formatter={(value: number) => [`${value}/100`, "Moyenne"]}
-              labelFormatter={(label) => data.find(d => d.subject === label)?.fullTitle || label}
+            <Tooltip
+              formatter={(value: any) => [`${value}/100`, "Moyenne"]} labelFormatter={(label) => data.find(d => d.subject === label)?.fullTitle || label}
             />
           </RadarChart>
         </ResponsiveContainer>
