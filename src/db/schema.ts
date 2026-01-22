@@ -9,12 +9,12 @@ export const assessmentStatusEnum = pgEnum("assessment_status", ["draft", "publi
 // ==========================================
 
 export const users = pgTable("users", {
-  id: text("id").primaryKey(), // String ID (often UUID) for auth users
+  id: text("id").primaryKey(), 
   name: text("name"),
   email: text("email").notNull().unique(),
   password: text("password"), // Hashed
-  role: text("role").default("teacher"), // Simplified to text: 'teacher', 'admin', etc.
   createdAt: timestamp("created_at").defaultNow(),
+  role: text("role").default("teacher").notNull(), 
 });
 
 // 1. NOUVELLE TABLE : LES RÉFÉRENTIELS

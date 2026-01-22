@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2, Plus, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-export function TpManagement({ data }: { data: any[] }) {
+// MODIF 1 : On ajoute `isAdmin` dans les props attendues par le composant
+export function TpManagement({ data, isAdmin }: { data: any[], isAdmin: boolean }) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
@@ -38,44 +39,47 @@ export function TpManagement({ data }: { data: any[] }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" /> Nouveau TP</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Créer un TP</DialogTitle></DialogHeader>
-            <div className="space-y-4 py-4">
-              <Input placeholder="Titre (ex: Vidange)" value={title} onChange={e => setTitle(e.target.value)} />
-              
-              <Select onValueChange={setCategory} value={category}>
-                <SelectTrigger><SelectValue placeholder="Catégorie" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Moteur">Moteur</SelectItem>
-                  <SelectItem value="Freinage">Freinage</SelectItem>
-                  <SelectItem value="Transmission">Transmission</SelectItem>
-                  <SelectItem value="Électricité">Électricité</SelectItem>
-                  <SelectItem value="Carrosserie">Carrosserie</SelectItem>
-                  <SelectItem value="Entretien">Entretien</SelectItem>
-                </SelectContent>
-              </Select>
+        {/* MODIF 2 : On affiche le bouton "Nouveau TP" SEULEMENT si isAdmin est vrai */}
+        {isAdmin && (
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button><Plus className="mr-2 h-4 w-4" /> Nouveau TP</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Créer un TP</DialogTitle></DialogHeader>
+              <div className="space-y-4 py-4">
+                <Input placeholder="Titre (ex: Vidange)" value={title} onChange={e => setTitle(e.target.value)} />
+                
+                <Select onValueChange={setCategory} value={category}>
+                  <SelectTrigger><SelectValue placeholder="Catégorie" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Moteur">Moteur</SelectItem>
+                    <SelectItem value="Freinage">Freinage</SelectItem>
+                    <SelectItem value="Transmission">Transmission</SelectItem>
+                    <SelectItem value="Électricité">Électricité</SelectItem>
+                    <SelectItem value="Carrosserie">Carrosserie</SelectItem>
+                    <SelectItem value="Entretien">Entretien</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              <Select onValueChange={setColor} value={color}>
-                <SelectTrigger><SelectValue placeholder="Couleur" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bg-red-500">Rouge</SelectItem>
-                  <SelectItem value="bg-blue-500">Bleu</SelectItem>
-                  <SelectItem value="bg-green-500">Vert</SelectItem>
-                  <SelectItem value="bg-yellow-500">Jaune</SelectItem>
-                  <SelectItem value="bg-purple-500">Violet</SelectItem>
-                  <SelectItem value="bg-gray-400">Gris</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <DialogFooter>
-              <Button onClick={handleSubmit} disabled={isPending}>Ajouter</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                <Select onValueChange={setColor} value={color}>
+                  <SelectTrigger><SelectValue placeholder="Couleur" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bg-red-500">Rouge</SelectItem>
+                    <SelectItem value="bg-blue-500">Bleu</SelectItem>
+                    <SelectItem value="bg-green-500">Vert</SelectItem>
+                    <SelectItem value="bg-yellow-500">Jaune</SelectItem>
+                    <SelectItem value="bg-purple-500">Violet</SelectItem>
+                    <SelectItem value="bg-gray-400">Gris</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <DialogFooter>
+                <Button onClick={handleSubmit} disabled={isPending}>Ajouter</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <div className="border rounded-md">
@@ -84,7 +88,8 @@ export function TpManagement({ data }: { data: any[] }) {
             <tr>
               <th className="px-4 py-3">TP</th>
               <th className="px-4 py-3">Catégorie</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              {/* On cache la colonne Actions si on n'est pas admin, ou on la laisse vide */}
+              {isAdmin && <th className="px-4 py-3 text-right">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -97,11 +102,15 @@ export function TpManagement({ data }: { data: any[] }) {
                   </div>
                 </td>
                 <td className="px-4 py-3"><Badge variant="outline">{tp.category}</Badge></td>
-                <td className="px-4 py-3 text-right">
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(tp.id)} disabled={isPending}>
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </td>
+                
+                {/* MODIF 3 : On affiche le bouton Supprimer SEULEMENT si isAdmin est vrai */}
+                {isAdmin && (
+                  <td className="px-4 py-3 text-right">
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(tp.id)} disabled={isPending}>
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
