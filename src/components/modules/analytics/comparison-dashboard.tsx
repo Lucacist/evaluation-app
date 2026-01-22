@@ -88,7 +88,7 @@ export function ComparisonDashboard({ data, assessments }: Props) {
                 
                 <Tooltip 
                   cursor={{fill: 'transparent'}}
-                  labelFormatter={(label) => data.find(d => d.name === label)?.fullTitle || label}
+                  labelFormatter={(label) => data.find(d => d.name === label)?.fullTitle || label}  
                 />
                 <Legend verticalAlign="top" height={36}/>
 

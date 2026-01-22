@@ -1,31 +1,45 @@
 "use server";
 
 import { db } from "@/db";
-import { groups, poles, activities, competenceBlocks, criteria } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { groups, poles, activities, competenceBlocks, criteria, grades, referentials, enrollments, students } from "@/db/schema";import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 // --- GESTION DES GROUPES ---
 
 // AJOUT DE prevState: any
-export async function createGroupAction(prevState: any, formData: FormData) {
-  const name = formData.get("name") as string;
-  const schoolYear = formData.get("schoolYear") as string;
+export async function createGroupAction(name: string, schoolYear: string, referentialId: number) {
+  if (!name || !schoolYear || !referentialId) return { error: "Tous les champs sont requis" };
   
-  if (!name || !schoolYear) return { error: "Champs requis" };
+  await db.insert(groups).values({ 
+    name, 
+    schoolYear,
+    referentialId 
+  });
+  revalidatePath("/dashboard");
+  return { success: true };
+}
 
-  await db.insert(groups).values({ name, schoolYear });
-  revalidatePath("/dashboard/settings");
+export async function updateGroupAction(id: number, name: string, schoolYear: string, referentialId: number) {
+  await db.update(groups)
+    .set({ name, schoolYear, referentialId })
+    .where(eq(groups.id, id));
+  revalidatePath("/dashboard");
   return { success: true };
 }
 
 export async function deleteGroupAction(id: number) {
   try {
+    // Drizzle gère les cascades si configuré, mais par sécurité :
+    // 1. Supprimer les inscriptions
+    await db.delete(enrollments).where(eq(enrollments.groupId, id));
+    // 2. Supprimer le groupe
     await db.delete(groups).where(eq(groups.id, id));
-    revalidatePath("/dashboard/settings");
+    
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (e) {
-    return { error: "Impossible de supprimer (groupe non vide ?)" };
+    console.error(e);
+    return { error: "Erreur lors de la suppression" };
   }
 }
 
