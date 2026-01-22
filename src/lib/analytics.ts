@@ -76,3 +76,45 @@ export function prepareComparisonData(referential: any[], assessmentsWithGrades:
 
   return chartData;
 }
+
+export function prepareRadarData(referential: any[], assessments: any[]) {
+  if (!referential || !assessments) return [];
+
+  return referential.map((pole) => {
+    // 1. Récupérer tous les IDs de critères appartenant à ce pôle
+    const poleCriteriaIds = new Set<number>();
+    
+    // On parcourt toute la hiérarchie du pôle pour trouver les IDs des critères
+    pole.activities?.forEach((activity: any) => {
+      activity.blocks?.forEach((block: any) => {
+        block.criteria?.forEach((criterion: any) => {
+          poleCriteriaIds.add(criterion.id);
+        });
+      });
+    });
+
+    // 2. Trouver toutes les notes de l'élève qui correspondent à ces critères
+    let totalScore = 0;
+    let count = 0;
+
+    assessments.forEach((assessment: any) => {
+      assessment.grades?.forEach((grade: any) => {
+        if (poleCriteriaIds.has(grade.criterionId)) {
+          totalScore += grade.value;
+          count++;
+        }
+      });
+    });
+
+    // 3. Calculer la moyenne
+    const average = count > 0 ? Math.round(totalScore / count) : 0;
+
+    // 4. Formater pour le graphique
+    return {
+      subject: `Pôle ${pole.order}`, // Axe du graphique (ex: Pôle 1)
+      fullTitle: pole.title,         // Titre complet pour le survol
+      A: average,                    // La moyenne
+      fullMark: 100,
+    };
+  });
+}

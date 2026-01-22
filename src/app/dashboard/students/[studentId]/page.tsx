@@ -1,27 +1,31 @@
 import { db } from "@/db";
-import { students, groups, enrollments, assessments } from "@/db/schema";
+import { students, groups, enrollments, assessments, grades, poles, activities, competenceBlocks, criteria, studentTps, tps } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, User, GraduationCap, Calendar, ChevronRight, Play } from "lucide-react";
+import { ArrowLeft, Mail, User, GraduationCap, Calendar, ChevronRight, Play, Wrench } from "lucide-react";
 import Link from "next/link";
 import { EditStudentDialog } from "@/components/modules/students/edit-student-dialog";
 import { DeleteStudentAlert } from "@/components/modules/students/delete-student-alert";
 import { OpenActiveAssessmentButton } from "@/components/modules/assessments/open-active-assessment-button";
-import { poles, activities, competenceBlocks, criteria, grades } from "@/db/schema";
 import { CompetenceRadar } from "@/components/modules/analytics/competence-radar";
 import { computePoleAverages } from "@/lib/analytics";
 import { LineChart as ChartIcon } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface PageProps {
-  params: Promise<{ studentId: string }>;
+  params: Promise<{ studentId: string }>; // Note: Next.js utilise souvent 'id' ou 'studentId' selon le nom du dossier
 }
 
 export default async function StudentProfilePage({ params }: PageProps) {
-  const { studentId } = await params;
-  const id = parseInt(studentId);
+  // Adaptation : si ton dossier s'appelle [id], utilise .id, sinon .studentId
+  const resolvedParams = await params;
+  const idStr = (resolvedParams as any).id || resolvedParams.studentId; 
+  const id = parseInt(idStr);
+
   if (isNaN(id)) return notFound();
 
   // 1. Infos Élève & Groupe
@@ -51,8 +55,10 @@ export default async function StudentProfilePage({ params }: PageProps) {
   // Les autres sont des archives
   const archives = allAssessments.filter(a => a.status === "published");
 
-  // 4. RÉCUPÉRATION DONNÉES POUR GRAPHIQUE
+  // 3. RÉCUPÉRATION DONNÉES POUR GRAPHIQUE
+  // (J'ajoute le filtre referentialId pour sécuriser le graphique)
   const referential = await db.query.poles.findMany({
+    where: group.referentialId ? eq(poles.referentialId, group.referentialId) : undefined,
     with: { activities: { with: { blocks: { with: { criteria: true } } } } }
   });
 
@@ -70,8 +76,20 @@ export default async function StudentProfilePage({ params }: PageProps) {
     chartData = computePoleAverages(referential, gradesMap);
   }
 
+  // 4. RÉCUPÉRATION HISTORIQUE ATELIER (TPs) -- AJOUT ICI
+  const tpHistory = await db.select({
+    date: studentTps.assignedAt,
+    tpTitle: tps.title,
+    category: tps.category,
+    color: tps.color
+  })
+  .from(studentTps)
+  .leftJoin(tps, eq(studentTps.tpId, tps.id))
+  .where(eq(studentTps.studentId, id))
+  .orderBy(desc(studentTps.assignedAt));
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-10">
 
       {/* Header / Retour */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -84,29 +102,31 @@ export default async function StudentProfilePage({ params }: PageProps) {
       <div className="grid gap-6 md:grid-cols-2">
 
         {/* COLONNE GAUCHE : Identité */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <User className="h-6 w-6 text-primary" />
-              {student.lastName.toUpperCase()} {student.firstName}
-            </CardTitle>
-            <CardDescription>Fiche d'identité</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-md">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{student.email || "Aucun email"}</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-md">
-              <GraduationCap className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{group.name}</span>
-            </div>
-            <div className="flex gap-2 pt-4 border-t mt-4">
-              <EditStudentDialog student={student} currentGroupId={group.id} allGroups={allGroups} />
-              <DeleteStudentAlert studentId={student.id} groupId={group.id} />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+            <Card>
+            <CardHeader>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                <User className="h-6 w-6 text-primary" />
+                {student.lastName.toUpperCase()} {student.firstName}
+                </CardTitle>
+                <CardDescription>Fiche d'identité</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-md">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{student.email || "Aucun email"}</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-md">
+                <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{group.name}</span>
+                </div>
+                <div className="flex gap-2 pt-4 border-t mt-4">
+                <EditStudentDialog student={student} currentGroupId={group.id} allGroups={allGroups} />
+                <DeleteStudentAlert studentId={student.id} groupId={group.id} />
+                </div>
+            </CardContent>
+            </Card>
+        </div>
 
         {/* COLONNE DROITE : SUIVI & ARCHIVES */}
         <div className="space-y-6">
@@ -143,7 +163,6 @@ export default async function StudentProfilePage({ params }: PageProps) {
           </div>
 
           {/* LISTE DES ARCHIVES (Trimestres passés) */}
-          {/* Note : J'ai retiré le </div> qui était ici, pour que Archives soit dans la même colonne */}
           <Card>
             <CardHeader>
               <CardTitle>Archives & Bulletins</CardTitle>
@@ -175,8 +194,60 @@ export default async function StudentProfilePage({ params }: PageProps) {
           </Card>
 
         </div> {/* Fermeture de la colonne droite */}
-
       </div> {/* Fermeture de la grille */}
+
+      {/* --- NOUVELLE SECTION : HISTORIQUE ATELIER (Bas de page) --- */}
+      <Card>
+        <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+                <Wrench className="h-5 w-5 text-slate-500" />
+                Historique Atelier
+            </CardTitle>
+            <CardDescription>
+                Liste des TPs réalisés et enregistrés.
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+            {tpHistory.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground italic">
+                    Aucun TP enregistré pour le moment.
+                </div>
+            ) : (
+                <div className="rounded-md border">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50 border-b">
+                            <tr>
+                                <th className="px-4 py-3 font-medium">Date</th>
+                                <th className="px-4 py-3 font-medium">Catégorie</th>
+                                <th className="px-4 py-3 font-medium">TP</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                            {tpHistory.map((h, i) => (
+                                <tr key={i} className="hover:bg-slate-50 transition-colors">
+                                    <td className="px-4 py-3 text-slate-600">
+                                        {h.date ? format(h.date, "dd MMM yyyy", { locale: fr }) : "-"}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <Badge variant="outline" className="font-normal bg-slate-50">
+                                            {h.category}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-4 py-3 font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-2 h-2 rounded-full ${h.color || "bg-gray-400"}`}></div>
+                                            {h.tpTitle}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </CardContent>
+      </Card>
+
     </div>
   );
 }
