@@ -107,3 +107,29 @@ export async function resetGroupAction(groupId: number) {
     return { error: "Erreur lors du nettoyage de la séance" };
   }
 }
+
+// --- 5. AJOUT MANUEL D'UN HISTORIQUE ---
+export async function addHistoryEntryAction(studentId: number, tpId: number, date: Date) {
+  try {
+    await db.insert(studentTps).values({
+      studentId,
+      tpId,
+      assignedAt: date,
+    });
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
+  } catch (e) {
+    return { error: "Erreur lors de l'ajout" };
+  }
+}
+
+// --- 6. SUPPRIMER UN HISTORIQUE ---
+export async function deleteHistoryEntryAction(historyId: number, studentId: number) {
+  try {
+    await db.delete(studentTps).where(eq(studentTps.id, historyId));
+    revalidatePath(`/dashboard/students/${studentId}`);
+    return { success: true };
+  } catch (e) {
+    return { error: "Erreur lors de la suppression" };
+  }
+}
