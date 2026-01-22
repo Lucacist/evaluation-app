@@ -7,7 +7,15 @@ import { RotateCcw, Save } from "lucide-react";
 import { resetGroupAction, saveSessionHistoryAction } from "@/actions/workshop";
 import { useTransition } from "react";
 
-export function SessionManager({ students, vehicles, tps, groupId }: any) {
+type SessionManagerProps = {
+  students: any[];
+  vehicles: any[];
+  tps: any[];
+  groupId: number;
+  isAdmin: boolean; 
+};
+
+export function SessionManager({ students, vehicles, tps, groupId, isAdmin }: SessionManagerProps) {
   const [isPending, startTransition] = useTransition();
 
   // On calcule la liste des véhicules occupés pour filtrer dans les lignes
@@ -41,14 +49,15 @@ export function SessionManager({ students, vehicles, tps, groupId }: any) {
 
   return (
     <div className="space-y-4">
-      
+
       {/* BARRE D'ACTIONS */}
+      {isAdmin && (
       <div className="flex justify-end gap-3 bg-slate-50 p-3 rounded-lg mb-4 border border-slate-100">
-        
+
         {/* Bouton Enregistrer (Vert) */}
-        <Button 
-          variant="default" 
-          onClick={handleSaveSession} 
+        <Button
+          variant="default"
+          onClick={handleSaveSession}
           disabled={isPending}
           className="bg-green-600 hover:bg-green-700 text-white"
         >
@@ -57,8 +66,8 @@ export function SessionManager({ students, vehicles, tps, groupId }: any) {
         </Button>
 
         {/* Bouton RAZ (Rouge) */}
-        <Button 
-          variant="destructive" 
+        <Button
+          variant="destructive"
           onClick={handleReset}
           disabled={isPending}
         >
@@ -66,17 +75,19 @@ export function SessionManager({ students, vehicles, tps, groupId }: any) {
           Fin de séance (RAZ)
         </Button>
       </div>
+      )}
 
       {/* LISTE DES ÉLÈVES */}
       <div>
         {students.map((student: any) => (
-          <StudentRow 
-            key={student.id} 
-            student={student} 
-            allVehicles={vehicles} 
-            allTps={tps} 
+          <StudentRow
+            key={student.id}
+            student={student}
+            allVehicles={vehicles}
+            allTps={tps}
             groupId={groupId}
             takenVehicleIds={takenVehicleIds}
+            isAdmin={isAdmin}
           />
         ))}
 
