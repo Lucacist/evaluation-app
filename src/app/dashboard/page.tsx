@@ -1,17 +1,19 @@
 import { db } from "@/db";
 import { groups, referentials } from "@/db/schema";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Users, Trash2 } from "lucide-react";
+import { Users, Trash2, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { GroupDialog } from "@/components/modules/groups/group-dialog";
-import { deleteGroupAction } from "@/actions/settings";
-import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
+
 
 // Petit composant pour le bouton supprimer (Client Component inline)
 import { DeleteGroupButton } from "./delete-group-button";
 
 export default async function DashboardPage() {
+  const user = await getCurrentUser();
+
+  const isAdmin = user?.role === "admin";
   const classes = await db.select().from(groups);
   const allRefs = await db.select().from(referentials);
 
@@ -24,7 +26,20 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
           <p className="text-muted-foreground">Sélectionnez une classe pour voir les élèves.</p>
         </div>
-        <GroupDialog mode="create" referentials={allRefs} />
+        <div className="flex items-center gap-2">
+          {isAdmin ? (
+            <div className="flex items-center gap-2 px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-full border border-red-200">
+              <ShieldAlert className="h-3 w-3" /> MODE ADMIN
+            </div>
+          ) : (
+            <div className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+              Mode Prof (Lecture seule)
+            </div>
+          )}
+          {isAdmin && (
+            <GroupDialog mode="create" referentials={allRefs} />
+          )}
+        </div>
       </div>
 
       {/* LISTE DES CLASSES */}
@@ -41,10 +56,12 @@ export default async function DashboardPage() {
                 </Link>
 
                 {/* ACTIONS (EDIT / DELETE) */}
-                <div className="flex items-center gap-1">
-                  <GroupDialog mode="edit" referentials={allRefs} group={group} />
-                  <DeleteGroupButton id={group.id} />
-                </div>
+                {isAdmin && (
+                  <div className="flex items-center gap-1">
+                    <GroupDialog mode="edit" referentials={allRefs} group={group} />
+                    <DeleteGroupButton id={group.id} />
+                  </div>
+                )}
               </div>
               <CardDescription>{group.schoolYear}</CardDescription>
             </CardHeader>

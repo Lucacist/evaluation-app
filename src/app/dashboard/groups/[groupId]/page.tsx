@@ -4,9 +4,10 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, User, ArrowLeft } from "lucide-react";
+import { Plus, User, ArrowLeft, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { AddStudentDialog } from "@/components/modules/students/add-student-dialog";
+import { getCurrentUser } from "@/lib/auth";
 
 // Cette interface définit les paramètres de l'URL (ex: groupId = "1")
 interface PageProps {
@@ -14,6 +15,9 @@ interface PageProps {
 }
 
 export default async function GroupPage({ params }: PageProps) {
+  const user = await getCurrentUser();
+
+  const isAdmin = user?.role === "admin";
   // Dans Next.js 15+, params est une Promise, il faut l'await
   const { groupId } = await params;
   const groupIdInt = parseInt(groupId);
@@ -44,7 +48,7 @@ export default async function GroupPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6">
-      
+
       {/* En-tête de page avec bouton retour */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
@@ -60,8 +64,21 @@ export default async function GroupPage({ params }: PageProps) {
             Liste des élèves inscrits pour l'année {group.schoolYear}
           </p>
         </div>
-        
-        <AddStudentDialog groupId={groupIdInt} />
+        <div className="flex items-center gap-2">
+
+          {isAdmin ? (
+            <div className="flex items-center gap-2 px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-full border border-red-200">
+              <ShieldAlert className="h-3 w-3" /> MODE ADMIN
+            </div>
+          ) : (
+            <div className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+              Mode Prof (Lecture seule)
+            </div>
+          )}
+          {isAdmin && (
+            <AddStudentDialog groupId={groupIdInt} />
+          )}
+        </div>
       </div>
 
       {/* Tableau des élèves */}
