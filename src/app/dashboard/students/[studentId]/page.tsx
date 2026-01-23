@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, User, GraduationCap, Calendar, ChevronRight, Play, Wrench } from "lucide-react";
+import { ArrowLeft, Mail, User, GraduationCap, Calendar, ChevronRight, Play, Wrench, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { EditStudentDialog } from "@/components/modules/students/edit-student-dialog";
 import { DeleteStudentAlert } from "@/components/modules/students/delete-student-alert";
@@ -17,12 +17,16 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AddHistoryDialog } from "@/components/modules/students/history/add-history-dialog";
 import { DeleteHistoryButton } from "@/components/modules/students/history/delete-history-button";
+import { getCurrentUser } from "@/lib/auth";
 
 interface PageProps {
   params: Promise<{ studentId: string }>; // Note: Next.js utilise souvent 'id' ou 'studentId' selon le nom du dossier
 }
 
 export default async function StudentProfilePage({ params }: PageProps) {
+  const user = await getCurrentUser();
+  const isAdmin = user?.role === "admin";
+
   // Adaptation : si ton dossier s'appelle [id], utilise .id, sinon .studentId
   const resolvedParams = await params;
   const idStr = (resolvedParams as any).id || resolvedParams.studentId;
@@ -94,11 +98,20 @@ export default async function StudentProfilePage({ params }: PageProps) {
     <div className="space-y-6 pb-10">
 
       {/* Header / Retour */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
         <Link href={`/dashboard/groups/${group.id}`} className="hover:text-primary flex items-center gap-1">
           <ArrowLeft className="h-4 w-4" />
           Retour à la classe {group.name}
         </Link>
+        {isAdmin ? (
+          <div className="flex items-center gap-2 px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-full border border-red-200">
+            <ShieldAlert className="h-3 w-3" /> MODE ADMIN
+          </div>
+        ) : (
+          <div className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+            Mode Prof (Lecture seule)
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -122,10 +135,12 @@ export default async function StudentProfilePage({ params }: PageProps) {
                 <GraduationCap className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">{group.name}</span>
               </div>
-              <div className="flex gap-2 pt-4 border-t mt-4">
-                <EditStudentDialog student={student} currentGroupId={group.id} allGroups={allGroups} />
-                <DeleteStudentAlert studentId={student.id} groupId={group.id} />
-              </div>
+              {isAdmin && (
+                <div className="flex gap-2 pt-4 border-t mt-4">
+                  <EditStudentDialog student={student} currentGroupId={group.id} allGroups={allGroups} />
+                  <DeleteStudentAlert studentId={student.id} groupId={group.id} />
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -201,62 +216,65 @@ export default async function StudentProfilePage({ params }: PageProps) {
       {/* --- NOUVELLE SECTION : HISTORIQUE ATELIER (Bas de page) --- */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-            <div className="space-y-1.5">
-                <CardTitle className="flex items-center gap-2">
-                    <Wrench className="h-5 w-5 text-slate-500" />
-                    Historique Atelier
-                </CardTitle>
-                <CardDescription>
-                    Liste des TPs réalisés et enregistrés.
-                </CardDescription>
-            </div>
-            
+          <div className="space-y-1.5">
+            <CardTitle className="flex items-center gap-2">
+              <Wrench className="h-5 w-5 text-slate-500" />
+              Historique Atelier
+            </CardTitle>
+            <CardDescription>
+              Liste des TPs réalisés et enregistrés.
+            </CardDescription>
+          </div>
+          {isAdmin && (
             <AddHistoryDialog studentId={student.id} allTps={allTpsList} />
+          )}
         </CardHeader>
 
         <CardContent>
-            {tpHistory.length === 0 ? (
-                <div className="text-center py-6 text-muted-foreground italic">
-                    Aucun TP enregistré pour le moment.
-                </div>
-            ) : (
-                <div className="rounded-md border">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50 border-b">
-                            <tr>
-                                <th className="px-4 py-3 font-medium">Date</th>
-                                <th className="px-4 py-3 font-medium">Catégorie</th>
-                                <th className="px-4 py-3 font-medium">TP</th>
-                                <th className="px-4 py-3 w-[50px]"></th> {/* Colonne Actions */}
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {tpHistory.map((h) => (
-                                <tr key={h.id} className="hover:bg-slate-50 transition-colors group">
-                                    <td className="px-4 py-3 text-slate-600">
-                                        {h.date ? format(h.date, "dd MMM yyyy", { locale: fr }) : "-"}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant="outline" className="font-normal bg-slate-50">
-                                            {h.category}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-4 py-3 font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`w-2 h-2 rounded-full ${h.color || "bg-gray-400"}`}></div>
-                                            {h.tpTitle}
-                                        </div>
-                                    </td>
-                                    {/* BOUTON SUPPRIMER (AJOUT ICI) */}
-                                    <td className="px-4 py-3 text-right">
-                                        <DeleteHistoryButton id={h.id} studentId={id} />
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+          {tpHistory.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground italic">
+              Aucun TP enregistré pour le moment.
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Date</th>
+                    <th className="px-4 py-3 font-medium">Catégorie</th>
+                    <th className="px-4 py-3 font-medium">TP</th>
+                    <th className="px-4 py-3 w-[50px]"></th> {/* Colonne Actions */}
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {tpHistory.map((h) => (
+                    <tr key={h.id} className="hover:bg-slate-50 transition-colors group">
+                      <td className="px-4 py-3 text-slate-600">
+                        {h.date ? format(h.date, "dd MMM yyyy", { locale: fr }) : "-"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className="font-normal bg-slate-50">
+                          {h.category}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 font-medium">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${h.color || "bg-gray-400"}`}></div>
+                          {h.tpTitle}
+                        </div>
+                      </td>
+                      {/* BOUTON SUPPRIMER (AJOUT ICI) */}
+                      {isAdmin && (
+                        <td className="px-4 py-3 text-right">
+                          <DeleteHistoryButton id={h.id} studentId={id} />
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

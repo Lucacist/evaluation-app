@@ -48,16 +48,23 @@ export default async function DashboardPage() {
           <Card key={group.id} className="hover:shadow-md transition-shadow relative group">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
-                <Link href={`/dashboard/groups/${group.id}`} className="flex-1">
-                  <CardTitle className="flex items-center gap-2 text-xl hover:text-primary transition-colors cursor-pointer">
-                    <Users className="h-5 w-5 text-muted-foreground" />
+
+                {/* TITRE + LIEN ÉTENDU */}
+                <CardTitle className="flex items-center gap-2 text-xl text-foreground">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+
+                  {/* Ce Link contient un span vide qui recouvre toute la carte */}
+                  <Link href={`/dashboard/groups/${group.id}`}>
+                    {/* Le span ci-dessous étend la zone de clic à tout le parent 'relative' (la Card) */}
+                    <span className="absolute inset-0" aria-hidden="true" />
                     {group.name}
-                  </CardTitle>
-                </Link>
+                  </Link>
+                </CardTitle>
 
                 {/* ACTIONS (EDIT / DELETE) */}
+                {/* IMPORTANT : 'relative z-10' permet aux boutons de rester cliquables au-dessus du lien global */}
                 {isAdmin && (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 relative z-10">
                     <GroupDialog mode="edit" referentials={allRefs} group={group} />
                     <DeleteGroupButton id={group.id} />
                   </div>

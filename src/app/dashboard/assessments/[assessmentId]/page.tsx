@@ -4,15 +4,19 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { AssessmentMatrix } from "@/components/modules/assessments/assessment-matrix"; // On va le créer après
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { SnapshotDialog } from "@/components/modules/assessments/snapshot-dialog";
+import { getCurrentUser } from "@/lib/auth";
 
 interface PageProps {
   params: Promise<{ assessmentId: string }>;
 }
 
 export default async function AssessmentPage({ params }: PageProps) {
+  const user = await getCurrentUser();
+  const isAdmin = user?.role === "admin";
+
   const { assessmentId } = await params;
   const id = parseInt(assessmentId);
   if (isNaN(id)) return notFound();
@@ -62,7 +66,7 @@ export default async function AssessmentPage({ params }: PageProps) {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      
+
       {/* HEADER FIXE */}
       <header className="flex items-center justify-between border-b bg-white px-6 py-3 shrink-0 z-10">
         <div className="flex items-center gap-4">
@@ -83,26 +87,35 @@ export default async function AssessmentPage({ params }: PageProps) {
             </p>
           </div>
         </div>
-        
+
         <div className="flex gap-2 items-center">
-           {assessmentData.status === "draft" && (
-             <SnapshotDialog assessmentId={id} />
-           )}
-           <Button variant="ghost" disabled className="text-muted-foreground text-xs">
-             Sauvegardé auto.
-           </Button>
+          {isAdmin ? (
+            <div className="flex items-center gap-2 px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-full border border-red-200">
+              <ShieldAlert className="h-3 w-3" /> MODE ADMIN
+            </div>
+          ) : (
+            <div className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+              Mode Prof (Lecture seule)
+            </div>
+          )}
+          {isAdmin && assessmentData.status === "draft" && (
+            <SnapshotDialog assessmentId={id} />
+          )}
+          <Button variant="ghost" disabled className="text-muted-foreground text-xs">
+            Sauvegardé auto.
+          </Button>
         </div>
       </header>
 
       {/* CONTENU PRINCIPAL SCROLLABLE */}
       <main className="flex-1 overflow-auto bg-slate-50 p-6">
         <div className="max-w-5xl mx-auto space-y-8">
-          
+
           {/* C'est ici qu'on va injecter le gros composant matrice */}
-          <AssessmentMatrix 
+          <AssessmentMatrix
             assessmentId={id}
-            referential={fullReferential} 
-            initialGrades={gradesMap} 
+            referential={fullReferential}
+            initialGrades={gradesMap}
             readOnly={assessmentData.status === "published"}
           />
 
