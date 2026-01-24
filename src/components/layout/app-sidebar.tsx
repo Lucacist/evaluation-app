@@ -11,9 +11,9 @@ import { logoutAction } from "@/actions/auth";
 const navItems = [
   { label: "Mes Classes", href: "/dashboard", icon: LayoutDashboard },
   // On ajoutera ça plus tard
-  { label: "Référentiel", href: "/dashboard/settings", icon: BookOpen },
+  { label: "Gestion de Séance", href: "/dashboard/settings", icon: BookOpen },
   {
-    label: "Atelier",
+    label: "Activités",
     href: "/dashboard/workshop",
     icon: Wrench,
   },

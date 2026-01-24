@@ -29,6 +29,8 @@ export const groups = pgTable("groups", {
   schoolYear: text("school_year").notNull(),
   referentialId: integer("referential_id").references(() => referentials.id),
   createdAt: timestamp("created_at").defaultNow(),
+  color: text("color").default("white").notNull(),
+  position: integer("position").default(0).notNull(),
 });
 
 // ==========================================

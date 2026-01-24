@@ -6,14 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Loader2 } from "lucide-react";
+// Correction 1 : On retire 'selectedColor' des imports d'icônes
+import { Plus, Pencil, Loader2, Check } from "lucide-react";
 import { createGroupAction, updateGroupAction } from "@/actions/settings";
+// Correction 2 : On importe la fonction utilitaire cn
+import { cn } from "@/lib/utils";
 
 type Props = {
   mode: "create" | "edit";
   referentials: any[];
   group?: any; // Optionnel si mode create
 };
+
+// 1. Définition de la palette de couleurs disponibles
+const COLORS = [
+  { name: "blue", class: "bg-blue-500", border: "border-blue-500" },
+  { name: "green", class: "bg-emerald-500", border: "border-emerald-500" },
+  { name: "purple", class: "bg-violet-500", border: "border-violet-500" },
+  { name: "red", class: "bg-rose-500", border: "border-rose-500" },
+  { name: "orange", class: "bg-amber-500", border: "border-amber-500" },
+  { name: "slate", class: "bg-slate-500", border: "border-slate-500" },
+];
 
 export function GroupDialog({ mode, referentials, group }: Props) {
   const [open, setOpen] = useState(false);
@@ -23,18 +36,20 @@ export function GroupDialog({ mode, referentials, group }: Props) {
   const [name, setName] = useState(group?.name || "");
   const [schoolYear, setSchoolYear] = useState(group?.schoolYear || "");
   const [refId, setRefId] = useState(group?.referentialId?.toString() || "");
+  // Correction 3 : "blue" par défaut (car "white" n'existe pas dans ta liste COLORS)
+  const [selectedColor, setSelectedColor] = useState(group?.color || "blue");
 
   const handleSubmit = () => {
     startTransition(async () => {
       if (mode === "create") {
-        await createGroupAction(name, schoolYear, parseInt(refId));
+        await createGroupAction(name, schoolYear, parseInt(refId), selectedColor);
       } else {
-        await updateGroupAction(group.id, name, schoolYear, parseInt(refId));
+        await updateGroupAction(group.id, name, schoolYear, parseInt(refId), selectedColor);
       }
       setOpen(false);
       // Reset si création
       if (mode === "create") {
-        setName(""); setSchoolYear(""); setRefId("");
+        setName(""); setSchoolYear(""); setRefId(""); setSelectedColor("blue");
       }
     });
   };
@@ -66,6 +81,28 @@ export function GroupDialog({ mode, referentials, group }: Props) {
           <div className="space-y-2">
             <Label>Année Scolaire</Label>
             <Input placeholder="Ex: 2025-2026" value={schoolYear} onChange={e => setSchoolYear(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Couleur de l'étiquette</Label>
+            <div className="flex gap-3">
+              {COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  onClick={() => setSelectedColor(c.name)}
+                  type="button"
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+                    c.class,
+                    selectedColor === c.name 
+                      ? "ring-2 ring-offset-2 ring-black dark:ring-white scale-110" 
+                      : "hover:scale-105 opacity-80 hover:opacity-100"
+                  )}
+                >
+                  {selectedColor === c.name && <Check className="h-4 w-4 text-white" />}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-2">
