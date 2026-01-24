@@ -11,14 +11,28 @@ import { asc } from "drizzle-orm";
 import { DeleteGroupButton } from "./delete-group-button";
 import { MoveGroupButtons } from "@/components/modules/groups/move-group-buttons";
 
-// DÉFINITION DES COULEURS (Mapping Nom -> Classe Tailwind)
-const COLOR_MAP: Record<string, string> = {
-  blue: "border-l-blue-500",
-  green: "border-l-emerald-500",
-  purple: "border-l-violet-500",
-  red: "border-l-rose-500",
-  orange: "border-l-amber-500",
-  slate: "border-l-slate-500",
+// DÉFINITION DES COULEURS (Mapping Nom -> Classes Tailwind pour fond + bordure)
+const COLOR_MAP: Record<string, { bg: string; border: string }> = {
+  blue: { bg: "bg-blue-50", border: "border-blue-200" },
+  green: { bg: "bg-emerald-50", border: "border-emerald-200" },
+  purple: { bg: "bg-violet-50", border: "border-violet-200" },
+  red: { bg: "bg-rose-50", border: "border-rose-200" },
+  orange: { bg: "bg-amber-50", border: "border-amber-200" },
+  slate: { bg: "bg-slate-50", border: "border-slate-200" },
+  indigo: { bg: "bg-indigo-50", border: "border-indigo-200" },
+  pink: { bg: "bg-pink-50", border: "border-pink-200" },
+  cyan: { bg: "bg-cyan-50", border: "border-cyan-200" },
+  teal: { bg: "bg-teal-50", border: "border-teal-200" },
+  lime: { bg: "bg-lime-50", border: "border-lime-200" },
+  yellow: { bg: "bg-yellow-50", border: "border-yellow-200" },
+  fuchsia: { bg: "bg-fuchsia-50", border: "border-fuchsia-200" },
+  sky: { bg: "bg-sky-50", border: "border-sky-200" },
+  emerald: { bg: "bg-emerald-50", border: "border-emerald-200" },
+  rose: { bg: "bg-rose-50", border: "border-rose-200" },
+  amber: { bg: "bg-amber-50", border: "border-amber-200" },
+  violet: { bg: "bg-violet-50", border: "border-violet-200" },
+  gray: { bg: "bg-gray-50", border: "border-gray-200" },
+  zinc: { bg: "bg-zinc-50", border: "border-zinc-200" },
 };
 
 export default async function DashboardPage() {
@@ -57,18 +71,15 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {classes.map((group, index) => {
           // 2. CALCUL DE LA COULEUR
-          // On récupère la classe CSS correspondant à la couleur stockée (ou bleu par défaut)
-          // Note: TypeScript peut râler si 'color' n'est pas encore dans tes types générés, 
-          // tu peux ajouter "as any" temporairement : (group as any).color
-          const borderClass = COLOR_MAP[group.color as string] || "border-l-blue-500";
+          const colorClasses = COLOR_MAP[group.color as string] || { bg: "bg-blue-50", border: "border-blue-200" };
           const isFirst = index === 0;
           const isLast = index === classes.length - 1;
 
           return (
             <Card
               key={group.id}
-              // 3. APPLICATION DE LA COULEUR (border-l-4 + borderClass)
-              className={`hover:shadow-md transition-shadow relative group overflow-hidden border-l-4 ${borderClass}`}
+              // 3. APPLICATION DE LA COULEUR (fond + bordure)
+              className={`hover:shadow-md transition-shadow relative group overflow-hidden ${colorClasses.bg} ${colorClasses.border} border-2`}
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
