@@ -12,7 +12,7 @@ export default function DashboardLayout({
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       
       {/* A. Sidebar pour Desktop (Cachée sur mobile) */}
-      <div className="hidden border-r bg-muted/40 md:block">
+      <div className="hidden border-r bg-muted/40 md:block h-screen sticky top-0 overflow-y-auto">
         <AppSidebar />
       </div>
 

@@ -52,7 +52,7 @@ export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicle
   };
 
   return (
-    <div className="flex items-center gap-4 p-4 bg-white border rounded-lg shadow-sm mb-2 hover:bg-slate-50 transition-colors">
+    <div className="flex items-center gap-4 p-4 bg-white border rounded-lg shadow-sm mb-2 hover:bg-slate-50 transition-colors w-full">
       
       {/* AVATAR */}
       <div className="flex-shrink-0">
@@ -67,12 +67,12 @@ export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicle
       </div>
 
       {/* NOM DE L'ÉLÈVE */}
-      <div className="w-1/5 font-semibold text-lg">
+      <div className="flex-1 min-w-0 font-semibold text-lg">
         {student.lastName.toUpperCase()} {student.firstName}
       </div>
 
       {/* SÉLECTEUR TP */}
-      <div className="w-1/4 px-2">
+      <div className="flex-1 min-w-0 px-2">
         <Select 
           onValueChange={handleTpChange} 
           value={student.currentTpId?.toString() || "none"}
@@ -103,7 +103,7 @@ export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicle
       </div>
 
       {/* SÉLECTEUR VÉHICULE */}
-      <div className="w-1/4 px-2">
+      <div className="flex-1 min-w-0 px-2">
         <Select 
           onValueChange={handleVehicleChange} 
           value={student.currentVehicleId?.toString() || "none"}
