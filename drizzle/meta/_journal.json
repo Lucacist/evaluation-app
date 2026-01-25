@@ -15,6 +15,13 @@
       "when": 1769347960530,
       "tag": "0001_big_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769352723361,
+      "tag": "0002_colossal_captain_universe",
+      "breakpoints": true
     }
   ]
 }

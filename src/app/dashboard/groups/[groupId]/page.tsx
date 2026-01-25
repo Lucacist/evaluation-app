@@ -8,6 +8,7 @@ import { Plus, User, ArrowLeft, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { AddStudentDialog } from "@/components/modules/students/add-student-dialog";
 import { ImportCsvDialog } from "@/components/modules/students/import-csv-dialog";
+import { StudentAvatar } from "@/components/modules/students/student-avatar";
 import { getCurrentUser } from "@/lib/auth";
 
 // Cette interface définit les paramètres de l'URL (ex: groupId = "1")
@@ -41,6 +42,7 @@ export default async function GroupPage({ params }: PageProps) {
       firstName: students.firstName,
       lastName: students.lastName,
       email: students.email,
+      profileImage: students.profileImage,
       joinedAt: enrollments.joinedAt,
     })
     .from(students)
@@ -108,9 +110,14 @@ export default async function GroupPage({ params }: PageProps) {
               groupStudents.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell>
-                    <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
-                      <User className="h-4 w-4 text-slate-500" />
-                    </div>
+                    <StudentAvatar
+                      studentId={student.id}
+                      currentImage={student.profileImage}
+                      firstName={student.firstName}
+                      lastName={student.lastName}
+                      editable={isAdmin}
+                      size="sm"
+                    />
                   </TableCell>
                   <TableCell className="font-medium">{student.lastName.toUpperCase()}</TableCell>
                   <TableCell>{student.firstName}</TableCell>

@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AddHistoryDialog } from "@/components/modules/students/history/add-history-dialog";
 import { DeleteHistoryButton } from "@/components/modules/students/history/delete-history-button";
+import { StudentAvatar } from "@/components/modules/students/student-avatar";
 import { getCurrentUser } from "@/lib/auth";
 
 interface PageProps {
@@ -120,9 +121,18 @@ export default async function StudentProfilePage({ params }: PageProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <User className="h-6 w-6 text-primary" />
-                {student.lastName.toUpperCase()} {student.firstName}
+              <CardTitle className="text-2xl flex items-center gap-3">
+                <StudentAvatar
+                  studentId={student.id}
+                  currentImage={student.profileImage}
+                  firstName={student.firstName}
+                  lastName={student.lastName}
+                  editable={isAdmin}
+                  size="lg"
+                />
+                <div>
+                  {student.lastName.toUpperCase()} {student.firstName}
+                </div>
               </CardTitle>
               <CardDescription>Fiche d'identité</CardDescription>
             </CardHeader>

@@ -95,6 +95,7 @@ export const students = pgTable("students", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email"),
+  profileImage: text("profile_image"), // URL ou base64 de l'image de profil
   createdAt: timestamp("created_at").defaultNow(),
   // Workshop assignment fields
   currentTpId: integer("current_tp_id").references(() => tps.id),
