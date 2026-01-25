@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, LayoutDashboard, Settings, LogOut, BookOpen, Wrench } from "lucide-react";
+import { GraduationCap, LayoutDashboard, Settings, LogOut, BookOpen, Wrench, Cog } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
+import { useTheme, themeColors } from "@/components/theme-provider";
 
 // Les liens de navigation
 const navItems = [
@@ -17,13 +18,20 @@ const navItems = [
     href: "/dashboard/workshop",
     icon: Wrench,
   },
+  {
+    label: "Paramètres",
+    href: "/dashboard/user-settings",
+    icon: Cog,
+  },
 ];
 
 export function AppSidebar({ className }: { className?: string }) {
   const pathname = usePathname();
+  const { theme } = useTheme();
+  const sidebarColor = themeColors[theme]?.sidebar || "bg-card";
 
   return (
-    <div className={cn("flex h-full flex-col border-r bg-card", className)}>
+    <div className={cn("flex h-full flex-col border-r", sidebarColor, className)}>
 
       {/* 1. Logo / En-tête Sidebar */}
       <div className="flex h-16 items-center border-b px-6">
