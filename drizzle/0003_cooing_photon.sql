@@ -1,0 +1,1 @@
+ALTER TABLE "poles" ADD COLUMN "color" text DEFAULT 'bg-slate-100';

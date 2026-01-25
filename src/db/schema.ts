@@ -41,6 +41,7 @@ export const poles = pgTable("poles", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   order: integer("order").notNull(),
+  color: text("color").default("bg-slate-100"), // Couleur du pôle (ex: bg-green-100, bg-blue-100, bg-orange-100)
   // AJOUT : Lien vers le référentiel
   referentialId: integer("referential_id").references(() => referentials.id, { onDelete: 'cascade' }),
 });

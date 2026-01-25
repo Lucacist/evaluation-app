@@ -41,7 +41,7 @@ export function AssessmentMatrix({ assessmentId, referential, initialGrades, rea
       {referential.map((pole) => (
         <div key={pole.id} className="space-y-4">
           
-          <h2 className="text-xl font-bold text-slate-800 border-b pb-2">
+          <h2 className={cn("text-xl font-bold text-slate-800 border-b pb-2 rounded-t-lg px-4 py-2", pole.color || "bg-slate-100")}>
             {pole.title}
           </h2>
 
