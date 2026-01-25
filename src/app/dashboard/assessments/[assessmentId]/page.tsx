@@ -70,13 +70,21 @@ export default async function AssessmentPage({ params }: PageProps) {
 
       {/* HEADER FIXE */}
       <header className="flex items-center justify-between border-b bg-white px-6 py-3 shrink-0 z-10">
-        <div className="flex items-center gap-4">
-          <Link href={`/dashboard/students/${assessmentData.studentId}`}>
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
+        <div className="flex items-center gap-2">
+          <Link href={`/dashboard/settings?groupId=${assessmentData.group.id}`}>
+            <Button variant="ghost" size="sm" className="gap-1">
+              <ArrowLeft className="h-4 w-4" />
+              Activités
             </Button>
           </Link>
-          <div>
+          <span className="text-muted-foreground">|</span>
+          <Link href={`/dashboard/students/${assessmentData.studentId}`}>
+            <Button variant="ghost" size="sm" className="gap-1">
+              <ArrowLeft className="h-4 w-4" />
+              Profil
+            </Button>
+          </Link>
+          <div className="ml-4">
             <h1 className="text-lg font-bold flex items-center gap-2">
               {assessmentData.student.lastName} {assessmentData.student.firstName}
               <span className="text-sm font-normal text-muted-foreground bg-slate-100 px-2 py-0.5 rounded-full">

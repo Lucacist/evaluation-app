@@ -40,11 +40,15 @@ export default async function WorkshopPage({ searchParams }: Props) {
     if (g) {
       // Élèves + Ce qu'ils font actuellement (TP/Véhicule)
       // On utilise une requête relationnelle pour récupérer les élèves du groupe
-      groupStudents = await db.query.students.findMany({
+      const studentsData = await db.query.students.findMany({
         with: {
           enrollments: true,
           currentTp: true,
           currentVehicle: true,
+          assessments: {
+            where: (assessments, { eq }) => eq(assessments.status, "draft"),
+            limit: 1,
+          },
         },
         where: (students, { exists, eq, and }) => exists(
           db.select().from(enrollments).where(
@@ -56,6 +60,12 @@ export default async function WorkshopPage({ searchParams }: Props) {
         ),
         orderBy: asc(students.lastName),
       });
+
+      // Ajouter activeAssessmentId à chaque étudiant
+      groupStudents = studentsData.map(s => ({
+        ...s,
+        activeAssessmentId: s.assessments[0]?.id || null,
+      }));
 
       // Listes déroulantes
       allVehicles = await db.select().from(vehicles).orderBy(vehicles.name);

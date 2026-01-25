@@ -2,9 +2,13 @@
 
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { assignVehicleAction, assignTpAction } from "@/actions/workshop";
-import { Loader2 } from "lucide-react";
+import { createAssessmentAction } from "@/actions/assessments";
+import { Loader2, ClipboardCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StudentAvatar } from "@/components/modules/students/student-avatar";
+import { useRouter } from "next/navigation";
 
 // 1. CORRECTION DU TYPE PROPS
 type Props = {
@@ -13,11 +17,14 @@ type Props = {
   allTps: any[];
   groupId: number;
   takenVehicleIds: number[];
+  isAdmin: boolean;
 };
 
-export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicleIds }: Props) {
+export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicleIds, isAdmin }: Props) {
   const [loadingV, setLoadingV] = useState(false);
   const [loadingT, setLoadingT] = useState(false);
+  const [loadingAssessment, setLoadingAssessment] = useState(false);
+  const router = useRouter();
 
   const handleVehicleChange = async (val: string) => {
     setLoadingV(true);
@@ -34,16 +41,38 @@ export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicle
     setLoadingT(false);
   };
 
+  const handleOpenAssessment = async () => {
+    setLoadingAssessment(true);
+    if (student.activeAssessmentId) {
+      router.push(`/dashboard/assessments/${student.activeAssessmentId}`);
+    } else {
+      await createAssessmentAction(student.id, groupId);
+    }
+    setLoadingAssessment(false);
+  };
+
   return (
-    <div className="flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm mb-2 hover:bg-slate-50 transition-colors">
+    <div className="flex items-center gap-4 p-4 bg-white border rounded-lg shadow-sm mb-2 hover:bg-slate-50 transition-colors">
       
+      {/* AVATAR */}
+      <div className="flex-shrink-0">
+        <StudentAvatar
+          studentId={student.id}
+          currentImage={student.profileImage}
+          firstName={student.firstName}
+          lastName={student.lastName}
+          editable={isAdmin}
+          size="sm"
+        />
+      </div>
+
       {/* NOM DE L'ÉLÈVE */}
-      <div className="w-1/4 font-semibold text-lg">
+      <div className="w-1/5 font-semibold text-lg">
         {student.lastName.toUpperCase()} {student.firstName}
       </div>
 
       {/* SÉLECTEUR TP */}
-      <div className="w-1/3 px-2">
+      <div className="w-1/4 px-2">
         <Select 
           onValueChange={handleTpChange} 
           value={student.currentTpId?.toString() || "none"}
@@ -74,7 +103,7 @@ export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicle
       </div>
 
       {/* SÉLECTEUR VÉHICULE */}
-      <div className="w-1/3 px-2">
+      <div className="w-1/4 px-2">
         <Select 
           onValueChange={handleVehicleChange} 
           value={student.currentVehicleId?.toString() || "none"}
@@ -98,6 +127,22 @@ export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicle
             })}
           </SelectContent>
         </Select>
+      </div>
+
+      {/* BOUTON NOTATION */}
+      <div className="flex-shrink-0">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={handleOpenAssessment}
+          disabled={loadingAssessment}
+        >
+          {loadingAssessment ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ClipboardCheck className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
     </div>
