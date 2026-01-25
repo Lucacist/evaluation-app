@@ -16,6 +16,7 @@ interface PageProps {
 export default async function AssessmentPage({ params }: PageProps) {
   const user = await getCurrentUser();
   const isAdmin = user?.role === "admin";
+  const isTeacher = user?.role === "teacher";
 
   const { assessmentId } = await params;
   const id = parseInt(assessmentId);
@@ -98,13 +99,14 @@ export default async function AssessmentPage({ params }: PageProps) {
               Mode Prof (Lecture seule)
             </div>
           )}
-          {isAdmin && assessmentData.status === "draft" && (
+          {(isAdmin || isTeacher) && assessmentData.status === "draft" && (
             <SnapshotDialog assessmentId={id} />
           )}
           <Button variant="ghost" disabled className="text-muted-foreground text-xs">
             Sauvegardé auto.
           </Button>
-        </div>
+        </div>      
+
       </header>
 
       {/* CONTENU PRINCIPAL SCROLLABLE */}

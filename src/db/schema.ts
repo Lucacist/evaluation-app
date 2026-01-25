@@ -78,7 +78,7 @@ export const tps = pgTable("tps", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   category: text("category").default("General"), // ex: Moteur, Freinage...
-  color: text("color").default("bg-slate-100"), // For display tags
+  color: text("color").default("bg-slate-500"), // For display tags
   groupId: integer("group_id").references(() => groups.id), // Optionnel: TP spécifique à un groupe
 });
 

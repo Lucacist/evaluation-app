@@ -243,7 +243,7 @@ export default async function StudentProfilePage({ params }: PageProps) {
                     <th className="px-4 py-3 font-medium">Date</th>
                     <th className="px-4 py-3 font-medium">Catégorie</th>
                     <th className="px-4 py-3 font-medium">TP</th>
-                    <th className="px-4 py-3 w-[50px]"></th> {/* Colonne Actions */}
+                    {isAdmin && <th className="px-4 py-3 w-[50px]"></th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y">
