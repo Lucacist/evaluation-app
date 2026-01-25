@@ -66,7 +66,7 @@ export function AssessmentMatrix({ assessmentId, referential, initialGrades, rea
                 <AccordionItem 
                   key={activity.id} 
                   value={`activity-${activity.id}`} 
-                  className="border rounded-lg bg-white px-4"
+                  className={cn("border rounded-lg px-4", pole.color || "bg-white")}
                 >
                   <AccordionTrigger className="hover:no-underline py-4">
                     <div className="flex items-center justify-between w-full pr-4">
