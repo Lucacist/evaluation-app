@@ -13,10 +13,9 @@ type Props = {
   allTps: any[];
   groupId: number;
   takenVehicleIds: number[];
-  isAdmin: boolean; // Ajouté ici
 };
 
-export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicleIds, isAdmin }: Props) {
+export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicleIds }: Props) {
   const [loadingV, setLoadingV] = useState(false);
   const [loadingT, setLoadingT] = useState(false);
 
@@ -49,7 +48,7 @@ export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicle
           onValueChange={handleTpChange} 
           value={student.currentTpId?.toString() || "none"}
           // 2. CORRECTION DISABLED (Une seule ligne)
-          disabled={loadingT || !isAdmin} 
+          disabled={loadingT} 
         >
           <SelectTrigger className={cn("w-full", student.currentTp ? "bg-blue-50 border-blue-200 text-blue-700 font-medium" : "")}>
             {loadingT ? <Loader2 className="animate-spin h-4 w-4" /> : <SelectValue placeholder="Choisir un TP..." />}
@@ -80,7 +79,7 @@ export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicle
           onValueChange={handleVehicleChange} 
           value={student.currentVehicleId?.toString() || "none"}
           // 3. CORRECTION DISABLED
-          disabled={loadingV || !isAdmin}
+          disabled={loadingV }
         >
           <SelectTrigger className={cn("w-full", student.currentVehicle ? "bg-green-50 border-green-200 text-green-700 font-medium" : "")}>
              {loadingV ? <Loader2 className="animate-spin h-4 w-4" /> : <SelectValue placeholder="Choisir un véhicule..." />}
@@ -93,7 +92,7 @@ export function StudentRow({ student, allVehicles, allTps, groupId, takenVehicle
               return (
                 <SelectItem key={v.id} value={v.id.toString()} disabled={isTaken} className={isTaken ? "opacity-50" : ""}>
                   {v.name} {isTaken ? "(Pris)" : ""}
-                  <span className="text-xs text-muted-foreground ml-2">[{v.plate}]</span>
+                  {v.plate && <span className="text-xs text-muted-foreground ml-2">[{v.plate}]</span>}
                 </SelectItem>
               );
             })}

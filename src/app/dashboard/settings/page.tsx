@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { groups, students, enrollments, vehicles, tps } from "@/db/schema";
-import { eq, asc, and } from "drizzle-orm";
+import { eq, asc, and, or, isNull } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, ShieldAlert } from "lucide-react";
@@ -21,6 +21,7 @@ export default async function WorkshopPage({ searchParams }: Props) {
 
   // 3. DÉFINITION DU RÔLE
   const isAdmin = user?.role === "admin";
+  const isTeacher = user?.role === "teacher";
 
   // 1. Charger tous les groupes
   const allGroups = await db.select().from(groups);
@@ -58,7 +59,10 @@ export default async function WorkshopPage({ searchParams }: Props) {
 
       // Listes déroulantes
       allVehicles = await db.select().from(vehicles).orderBy(vehicles.name);
-      allTps = await db.select().from(tps).orderBy(tps.category, tps.title);
+      // TPs: ceux du groupe OU ceux sans groupe (globaux)
+      allTps = await db.select().from(tps)
+        .where(or(eq(tps.groupId, groupId), isNull(tps.groupId)))
+        .orderBy(tps.category, tps.title);
     }
   }
 
@@ -120,6 +124,7 @@ export default async function WorkshopPage({ searchParams }: Props) {
               tps={allTps}
               groupId={groupId}
               isAdmin={isAdmin}
+              isTeacher={isTeacher}
             />
 
           </div>

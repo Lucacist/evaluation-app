@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { tps, vehicles } from "@/db/schema";
+import { tps, vehicles, groups } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TpManagement } from "@/components/modules/workshop/tp-management";
@@ -17,6 +17,7 @@ export default async function WorkshopAdminPage() {
   // Récupération des données
   const allTps = await db.select().from(tps).orderBy(desc(tps.id));
   const allVehicles = await db.select().from(vehicles).orderBy(desc(vehicles.id));
+  const allGroups = await db.select().from(groups);
 
   return (
     <div className="space-y-6">
@@ -50,7 +51,7 @@ export default async function WorkshopAdminPage() {
 
         <TabsContent value="tps" className="mt-6">
           {/* On passe la variable isAdmin qu'on vient de créer */}
-          <TpManagement data={allTps} isAdmin={isAdmin} />
+          <TpManagement data={allTps} isAdmin={isAdmin} groups={allGroups} />
         </TabsContent>
 
         <TabsContent value="vehicles" className="mt-6">

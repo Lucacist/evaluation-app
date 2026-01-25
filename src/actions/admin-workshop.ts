@@ -7,9 +7,9 @@ import { revalidatePath } from "next/cache";
 
 // --- GESTION DES TPs ---
 
-export async function createTpAction(title: string, category: string, color: string) {
+export async function createTpAction(title: string, category: string, color: string, groupId: number | null) {
   try {
-    await db.insert(tps).values({ title, category, color });
+    await db.insert(tps).values({ title, category, color, groupId });
     revalidatePath("/dashboard/workshop");
     return { success: true };
   } catch (e) {
@@ -24,6 +24,16 @@ export async function deleteTpAction(id: number) {
     return { success: true };
   } catch (e) {
     return { error: "Erreur suppression TP" };
+  }
+}
+
+export async function updateTpAction(id: number, title: string, category: string, color: string, groupId: number | null) {
+  try {
+    await db.update(tps).set({ title, category, color, groupId }).where(eq(tps.id, id));
+    revalidatePath("/dashboard/workshop");
+    return { success: true };
+  } catch (e) {
+    return { error: "Erreur modification TP" };
   }
 }
 

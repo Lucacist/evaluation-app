@@ -8,6 +8,13 @@
       "when": 1768991527116,
       "tag": "0000_clumsy_wrecking_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769347960530,
+      "tag": "0001_big_thor",
+      "breakpoints": true
     }
   ]
 }

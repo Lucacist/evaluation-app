@@ -79,6 +79,7 @@ export const tps = pgTable("tps", {
   title: text("title").notNull(),
   category: text("category").default("General"), // ex: Moteur, Freinage...
   color: text("color").default("bg-slate-100"), // For display tags
+  groupId: integer("group_id").references(() => groups.id), // Optionnel: TP spécifique à un groupe
 });
 
 // 2. LES VÉHICULES (Fixed list: 207 Grise, C3 Pluriel...)
@@ -159,9 +160,10 @@ export const studentsRelations = relations(students, ({ one, many }) => ({
   assessments: many(assessments),
 }));
 
-export const tpsRelations = relations(tps, ({ many }) => ({
+export const tpsRelations = relations(tps, ({ one, many }) => ({
   currentStudents: many(students),
   history: many(studentTps),
+  group: one(groups, { fields: [tps.groupId], references: [groups.id] }),
 }));
 
 export const vehiclesRelations = relations(vehicles, ({ many }) => ({
@@ -172,6 +174,7 @@ export const groupsRelations = relations(groups, ({ many, one }) => ({ // <--- A
   enrollments: many(enrollments),
   assessments: many(assessments),
   referential: one(referentials, { fields: [groups.referentialId], references: [referentials.id] }),
+  tps: many(tps),
 }));
 
 export const enrollmentsRelations = relations(enrollments, ({ one }) => ({

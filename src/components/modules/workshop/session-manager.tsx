@@ -12,10 +12,11 @@ type SessionManagerProps = {
   vehicles: any[];
   tps: any[];
   groupId: number;
-  isAdmin: boolean; 
+  isAdmin: boolean;
+  isTeacher: boolean;
 };
 
-export function SessionManager({ students, vehicles, tps, groupId, isAdmin }: SessionManagerProps) {
+export function SessionManager({ students, vehicles, tps, groupId, isAdmin, isTeacher }: SessionManagerProps) {
   const [isPending, startTransition] = useTransition();
 
   // On calcule la liste des véhicules occupés pour filtrer dans les lignes
@@ -51,7 +52,7 @@ export function SessionManager({ students, vehicles, tps, groupId, isAdmin }: Se
     <div className="space-y-4">
 
       {/* BARRE D'ACTIONS */}
-      {isAdmin && (
+      {(isAdmin || isTeacher) && (
       <div className="flex justify-end gap-3 bg-slate-50 p-3 rounded-lg mb-4 border border-slate-100">
 
         {/* Bouton Enregistrer (Vert) */}
@@ -87,7 +88,6 @@ export function SessionManager({ students, vehicles, tps, groupId, isAdmin }: Se
             allTps={tps}
             groupId={groupId}
             takenVehicleIds={takenVehicleIds}
-            isAdmin={isAdmin}
           />
         ))}
 
