@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, User, ArrowLeft, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { AddStudentDialog } from "@/components/modules/students/add-student-dialog";
+import { ImportCsvDialog } from "@/components/modules/students/import-csv-dialog";
 import { getCurrentUser } from "@/lib/auth";
 
 // Cette interface définit les paramètres de l'URL (ex: groupId = "1")
@@ -76,7 +77,10 @@ export default async function GroupPage({ params }: PageProps) {
             </div>
           )}
           {isAdmin && (
-            <AddStudentDialog groupId={groupIdInt} />
+            <>
+              <ImportCsvDialog groupId={groupIdInt} />
+              <AddStudentDialog groupId={groupIdInt} />
+            </>
           )}
         </div>
       </div>
